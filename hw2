@@ -1,0 +1,173 @@
+from collections import Counter
+import re
+import statistics
+import math
+import pandas as pd
+import scipy.stats
+
+def kaiseki_keylength_analysis(plaintext):
+    ## Scrub and Define
+    plaintext = re.sub(r"\n","",plaintext)
+    keyLengths = {}
+    returnTest = 1
+    
+    ## Iterator
+    for possibleNumber in range(3,len(plaintext)):
+        stringList = [plaintext[i:i+possibleNumber] for i in range (0,len(plaintext),possibleNumber)]
+        maxCount = stringList.count(max(stringList))
+        keyLengths[possibleNumber]=maxCount
+        if maxCount > returnTest:
+            returnTest = maxCount
+    
+    ## Return Possible Key if Exists
+    possibleKey = max(keyLengths, key = keyLengths.get)
+    if returnTest > 1:
+        return possibleKey
+    else:
+        return 0
+
+def find_population_variance(numbersList):
+    ## Find Mean
+    mean = statistics.mean(numbersList)
+    sumsquares = 0
+    
+    ## Find SumSquares
+    for number in numbersList:
+        sumsquares = sumsquares + (number - mean)**2
+    
+    ## Calculate Variance
+    variance = sumsquares / len(numbersList)
+    return variance
+
+def countLettersFromText(plaintext):
+    plaintext = re.sub(r"\n","",plaintext)
+    ## Turn into Counted Dictionary and Return
+    returnCount = dict(Counter(plaintext))
+    returnCount = {k: v/len(plaintext) for k,v in returnCount.items()}
+    return returnCount
+
+def find_population_variance_text(plaintext):
+    plaintext = re.sub(r"\n","",plaintext)
+    ## Run countLettersFromText and find_population_variance together
+    countedLetters = countLettersFromText(plaintext)
+    populationVariance = find_population_variance(list(countedLetters.values()))
+    return populationVariance
+
+def return_alternating_lists(plaintext, n):
+    plaintext = re.sub(r"\n","",plaintext)
+    ## Split Lists into n alternating lists
+    listText = list(plaintext)
+    returnList = [[] for x in range(n)]
+    for i in range(len(listText)):
+        returnList[i%n].append(listText[i])
+    return returnList
+    
+def find_split_population_variance_text(plaintext, n):
+    plaintext = re.sub(r"\n","",plaintext)
+    ## Split Lists into n alternating lists
+    splitList = return_alternating_lists(plaintext, n)
+    
+    ## Find population variance of each list
+    populationVar = []
+    
+    for i in range(len(splitList)):
+        inputText = "".join(splitList[i])
+        populationVar.append(find_population_variance_text(inputText))
+    
+    ## Find mean of all the population var
+    mean = sum(populationVar)/len(populationVar)
+    return mean
+    
+def frequency_analysis_keylength_probability(plaintext):
+    ## Find Base English Index Variance
+    english_index = {
+        'A': 0.08167,
+        'B': 0.01492,
+        'C': 0.02782,
+        'D': 0.04253,
+        'E': 0.12702,
+        'F': 0.02228,
+        'G': 0.02015,
+        'H': 0.06094,
+        'I': 0.06996,
+        'J': 0.00153,
+        'K': 0.00772,
+        'L': 0.04025,
+        'M': 0.02406,
+        'N': 0.06749,
+        'O': 0.07507,
+        'P': 0.09929,
+        'Q': 0.00095,
+        'R': 0.05987,
+        'S': 0.06327,
+        'T': 0.09056,
+        'U': 0.02758,
+        'V': 0.00978,
+        'W': 0.02360,
+        'X': 0.00150,
+        'Y': 0.01974,
+        'Z': 0.00074
+    }
+    english_pop_var = find_population_variance(list(english_index.values()))
+    
+    plaintext = re.sub(r"\n","",plaintext)
+    probabilityDict = {}
+    critical_value = scipy.stats.f.ppf(1-0.05,len(plaintext),len(plaintext))
+    for i in range(1,len(plaintext)):
+        popVar = find_split_population_variance_text(plaintext, i)
+        if popVar > 0:
+            if popVar > english_pop_var:
+                critical_value = scipy.stats.f.ppf(1-0.05,len(plaintext),26)
+                probabilities = popVar / english_pop_var
+            else:
+                critical_value = scipy.stats.f.ppf(1-0.05, 26, len(plaintext))
+                probabilities = english_pop_var / popVar
+            if probabilities < critical_value:
+                probabilityDict[i] = probabilities
+
+    return probabilityDict
+
+def shifttext(text, shift):
+    A = ord('A')
+    return ''.join(
+        chr((ord(char) - A + shift) % 26 + A) if 'A' <= char <= 'Z' else char
+        for char in text.upper())
+
+def caesar_analysis_letter(plaintext):
+    english_index = {
+        'A': 0.08167,
+        'B': 0.01492,
+        'C': 0.02782,
+        'D': 0.04253,
+        'E': 0.12702,
+        'F': 0.02228,
+        'G': 0.02015,
+        'H': 0.06094,
+        'I': 0.06996,
+        'J': 0.00153,
+        'K': 0.00772,
+        'L': 0.04025,
+        'M': 0.02406,
+        'N': 0.06749,
+        'O': 0.07507,
+        'P': 0.09929,
+        'Q': 0.00095,
+        'R': 0.05987,
+        'S': 0.06327,
+        'T': 0.09056,
+        'U': 0.02758,
+        'V': 0.00978,
+        'W': 0.02360,
+        'X': 0.00150,
+        'Y': 0.01974,
+        'Z': 0.00074
+    }
+    
+    shiftDict = {}
+    
+    for i in range(1,26):
+        shiftedText = shifttext(plaintext, i)
+        countedLetters = countLettersFromText(shiftedText)
+        for key in english_index:
+            if key in countedLetters:
+                shiftDict[key] = 
